@@ -64,9 +64,9 @@ nav button:hover  { background: var(--surf2); color: var(--text); }
 nav button.active { background: var(--surf2); color: var(--text); border-color: var(--muted); }
 
 main {
-  max-width: 860px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 2.5rem 2rem;
 }
 
 .section { animation: fadeIn 0.25s; }
@@ -89,12 +89,18 @@ main {
 /* ── ESQUEMA ────────────────────────────────── */
 .schema-layout {
   display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  gap: 2.5rem;
+  align-items: center;
+  justify-content: center;
 }
-.schema-left { flex: 0 0 auto; }
+.schema-left {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .schema-right {
-  flex: 1;
+  flex: 0 0 50%;
   min-width: 0;
   position: sticky;
   top: 90px;
@@ -104,22 +110,23 @@ main {
   display: grid;
   grid-template-columns: 1fr 1.4fr 1fr;
   grid-template-rows: repeat(4, auto);
-  gap: 0.55rem;
+  gap: 0.7rem;
   margin-bottom: 1rem;
   text-align: center;
+  width: 100%;
 }
 
 .cell {
-  padding: 0.7rem 1rem;
-  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
   border: 1px solid transparent;
   user-select: none;
 }
 .cell:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
-.cell .factor { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: .65; display: block; margin-bottom: 0.15rem; }
-.cell .fname  { font-size: 0.95rem; font-weight: bold; }
+.cell .factor { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: .65; display: block; margin-bottom: 0.25rem; }
+.cell .fname  { font-size: 1.05rem; font-weight: bold; }
 .cell.inactive { opacity: .35; pointer-events: none; }
 
 .c-ref  { background: rgba(29,78,216,.08);   border-color: rgba(29,78,216,.35);   color: var(--referencial); }
@@ -137,7 +144,7 @@ main {
 #detail-panel.has-content {
   background: var(--surf);
   border: 1px solid var(--surf2);
-  padding: 1.4rem 1.6rem;
+  padding: 1.8rem 2rem;
 }
 
 .d-badge {
