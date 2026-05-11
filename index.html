@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funciones del Lenguaje — Jakobson (1960)</title>
+<style>
+:root {
+  --emotiva:        #c05621;
+  --referencial:    #1d4ed8;
+  --poetica:        #6d28d9;
+  --fatica:         #15803d;
+  --metalinguistica:#0e7490;
+  --conativa:       #b45309;
+  --bg:     #f7f5f0;
+  --surf:   #ffffff;
+  --surf2:  #e5e7eb;
+  --text:   #1e293b;
+  --muted:  #64748b;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.65;
+}
+
+/* ── HEADER ─────────────────────────────────── */
+header {
+  background: var(--surf);
+  border-bottom: 1px solid var(--surf2);
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  padding: 1.1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 { font-size: 1.15rem; font-weight: normal; letter-spacing: 0.04em; }
+header p  { color: var(--muted); font-size: 0.78rem; }
+
+nav { display: flex; gap: 0.4rem; }
+nav button {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--surf2);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: Georgia, serif;
+  transition: all 0.18s;
+}
+nav button:hover  { background: var(--surf2); color: var(--text); }
+nav button.active { background: var(--surf2); color: var(--text); border-color: var(--muted); }
+
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.section { animation: fadeIn 0.25s; }
+.hidden  { display: none !important; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION TITLE ──────────────────────────── */
+.section-title {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+/* ── ESQUEMA ────────────────────────────────── */
+.schema-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  grid-template-rows: repeat(4, auto);
+  gap: 0.55rem;
+  max-width: 560px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.cell {
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1px solid transparent;
+  user-select: none;
+}
+.cell:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.cell .factor { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: .65; display: block; margin-bottom: 0.15rem; }
+.cell .fname  { font-size: 0.95rem; font-weight: bold; }
+.cell.inactive { opacity: .35; pointer-events: none; }
+
+.c-ref  { background: rgba(29,78,216,.08);   border-color: rgba(29,78,216,.35);   color: var(--referencial); }
+.c-emo  { background: rgba(192,86,33,.08);   border-color: rgba(192,86,33,.35);   color: var(--emotiva); }
+.c-poe  { background: rgba(109,40,217,.08);  border-color: rgba(109,40,217,.35);  color: var(--poetica); }
+.c-con  { background: rgba(180,83,9,.08);    border-color: rgba(180,83,9,.35);    color: var(--conativa); }
+.c-fat  { background: rgba(21,128,61,.08);   border-color: rgba(21,128,61,.35);   color: var(--fatica); }
+.c-met  { background: rgba(14,116,144,.08);  border-color: rgba(14,116,144,.35);  color: var(--metalinguistica); }
+
+/* detail panel */
+#detail-panel {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--surf);
+  border: 1px solid var(--surf2);
+  border-radius: 14px;
+  padding: 1.4rem 1.6rem;
+  display: none;
+  animation: fadeIn .2s;
+}
+#detail-panel.visible { display: block; }
+
+.d-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  margin-bottom: 0.8rem;
+}
+.d-def   { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.8rem; }
+.d-quote {
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--muted);
+  border-left: 3px solid var(--surf2);
+  padding-left: 0.9rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
+}
+.d-ex-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.d-ex { font-style: italic; color: var(--muted); font-size: 0.88rem; }
+
+.tip {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* ── TARJETAS ───────────────────────────────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: var(--surf);
+  border: 1px solid var(--surf2);
+  border-radius: 14px;
+  padding: 1.3rem;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+
+.card-label   { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.4rem; }
+.card-name    { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.35rem; }
+.card-sub     { font-size: 0.78rem; color: var(--muted); }
+.card-hint    { font-size: 0.75rem; color: var(--muted); margin-top: 0.9rem; }
+
+/* ── QUIZ ───────────────────────────────────── */
+.quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+.progress-bar  { background: var(--surf2); border-radius: 4px; height: 3px; margin-bottom: 1.8rem; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #9b5cf6, #06b6d4); border-radius: 4px; transition: width 0.4s; }
+
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+.q-card {
+  background: var(--surf);
+  border: 1px solid var(--surf2);
+  border-radius: 16px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.q-num  { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 0.6rem; }
+.q-text { font-size: 1.2rem; font-style: italic; margin-bottom: 0.4rem; line-height: 1.5; }
+.q-ctx  { font-size: 0.78rem; color: var(--muted); }
+
+.opts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 1.2rem;
+}
+
+.opt-btn {
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--surf2);
+  background: var(--surf);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-family: Georgia, serif;
+  font-size: 0.92rem;
+  transition: all 0.18s;
+}
+.opt-btn:hover:not(:disabled) { background: var(--surf2); border-color: var(--muted); }
+.opt-btn.correct  { border-color: #22c55e; background: rgba(34,197,94,.1);  color: #4ade80; }
+.opt-btn.wrong    { border-color: #ef4444; background: rgba(239,68,68,.1);  color: #f87171; }
+.opt-btn.reveal   { border-color: #22c55e; background: rgba(34,197,94,.05); color: #86efac; }
+
+.feedback {
+  background: var(--surf);
+  border: 1px solid var(--surf2);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.2rem;
+  display: none;
+  animation: fadeIn .25s;
+}
+.feedback.visible { display: block; }
+.feedback.ok   { border-color: rgba(34,197,94,.4); }
+.feedback.fail { border-color: rgba(239,68,68,.3); }
+
+.fb-head { display: flex; align-items: center; gap: 0.45rem; font-weight: bold; margin-bottom: 0.4rem; font-size: 0.95rem; }
+.fb-expl { color: var(--muted); font-size: 0.87rem; line-height: 1.55; }
+
+.next-btn {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--surf2);
+  background: var(--surf2);
+  color: var(--text);
+  cursor: pointer;
+  font-family: Georgia, serif;
+  font-size: 0.97rem;
+  transition: background 0.18s;
+}
+.next-btn:hover { background: #d1d5db; }
+
+/* result */
+.result {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+.result-score {
+  font-size: 4.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #9b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.3rem;
+}
+.result-of    { color: var(--muted); margin-bottom: 1.5rem; }
+.result-msg   { font-style: italic; font-size: 1rem; color: var(--muted); margin-bottom: 2rem; }
+.restart-btn  {
+  padding: 0.8rem 2.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--surf2);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  transition: background .18s;
+}
+.restart-btn:hover { background: var(--surf); }
+
+/* mode toggle */
+.mode-bar {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.mode-btn {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--surf2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: Georgia, serif;
+  transition: all .18s;
+}
+.mode-btn.active { background: var(--surf2); color: var(--text); border-color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Funciones del Lenguaje</h1>
+    <p>Roman Jakobson — "Lingüística y Poética" (1960)</p>
+  </div>
+  <nav>
+    <button class="active" onclick="showSection('esquema')">Esquema</button>
+    <button onclick="showSection('tarjetas')">Tarjetas</button>
+    <button onclick="showSection('quiz')">Quiz</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ════════════ ESQUEMA ════════════ -->
+<div id="section-esquema" class="section">
+  <p class="section-title">Esquema del modelo — hacé clic en cada función para ver su definición</p>
+
+  <div class="schema-grid">
+    <!-- fila 1: REFERENCIAL centrado -->
+    <div></div>
+    <div class="cell c-ref" onclick="showDetail('referencial')">
+      <span class="factor">Contexto</span>
+      <span class="fname">Referencial</span>
+    </div>
+    <div></div>
+
+    <!-- fila 2: EMOTIVA — POÉTICA — CONATIVA -->
+    <div class="cell c-emo" onclick="showDetail('emotiva')">
+      <span class="factor">Destinador</span>
+      <span class="fname">Emotiva</span>
+    </div>
+    <div class="cell c-poe" onclick="showDetail('poetica')">
+      <span class="factor">Mensaje</span>
+      <span class="fname">Poética</span>
+    </div>
+    <div class="cell c-con" onclick="showDetail('conativa')">
+      <span class="factor">Destinatario</span>
+      <span class="fname">Conativa</span>
+    </div>
+
+    <!-- fila 3: FÁTICA centrado -->
+    <div></div>
+    <div class="cell c-fat" onclick="showDetail('fatica')">
+      <span class="factor">Contacto</span>
+      <span class="fname">Fática</span>
+    </div>
+    <div></div>
+
+    <!-- fila 4: METALINGÜÍSTICA centrado -->
+    <div></div>
+    <div class="cell c-met" onclick="showDetail('metalinguistica')">
+      <span class="factor">Código</span>
+      <span class="fname">Metalingüística</span>
+    </div>
+    <div></div>
+  </div>
+
+  <p class="tip">Según Jakobson (p. 360) — ningún mensaje tiene una sola función; siempre hay una <em>dominante</em></p>
+
+  <div id="detail-panel"></div>
+</div>
+
+
+<!-- ════════════ TARJETAS ════════════ -->
+<div id="section-tarjetas" class="section hidden">
+  <p class="section-title">Tarjetas de referencia — clic para ver definición / clic de nuevo para volver</p>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+
+<!-- ════════════ QUIZ ════════════ -->
+<div id="section-quiz" class="section hidden">
+  <div class="quiz-wrap">
+
+    <div class="mode-bar">
+      <button class="mode-btn active" id="btn-all" onclick="setMode('all')">Todas (20)</button>
+      <button class="mode-btn" id="btn-easy" onclick="setMode('easy')">Más claras (12)</button>
+      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Más difíciles (8)</button>
+    </div>
+
+    <div id="quiz-game">
+      <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+      <div class="quiz-meta">
+        <span id="score-txt">0 / 0 correctas</span>
+        <span id="qcount">Pregunta 1 de 20</span>
+      </div>
+      <div class="q-card">
+        <div class="q-num" id="qnum"></div>
+        <div class="q-text" id="qtext"></div>
+        <div class="q-ctx" id="qctx"></div>
+      </div>
+      <div class="opts-grid" id="opts"></div>
+      <div class="feedback" id="feedback">
+        <div class="fb-head"><span id="fb-icon"></span><span id="fb-title"></span></div>
+        <div class="fb-expl" id="fb-expl"></div>
+      </div>
+      <button class="next-btn hidden" id="next-btn" onclick="nextQ()"></button>
+    </div>
+
+    <div id="quiz-result" class="result hidden">
+      <div class="result-score" id="r-score"></div>
+      <div class="result-of" id="r-of"></div>
+      <div class="result-msg" id="r-msg"></div>
+      <button class="restart-btn" onclick="startQuiz()">Volver a intentar</button>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━ DATOS ━━━━━━━━━━━━━━━━━ */
+
+const FN = {
+  emotiva: {
+    name: 'Emotiva', aka: 'Expresiva', factor: 'Destinador',
+    color: '#c05621', bg: 'rgba(192,86,33,.08)', bd: 'rgba(192,86,33,.35)',
+    cls: 'c-emo',
+    def: 'Centrada en el <strong>destinador</strong>. Apunta a una expresión directa de la actitud del hablante ante aquello de lo que está hablando. Tiende a producir la impresión de una cierta emoción, sea verdadera o fingida.',
+    quote: '"La llamada función emotiva o «expresiva», centrada en el DESTINADOR, apunta a una expresión directa de la actitud del hablante ante aquello de lo que está hablando." (p. 353)',
+    ex: ['¡Ay, qué dolor!  —  ¡Qué asco!  —  ¡Me muero de vergüenza!', 'Las interjecciones son su expresión más pura.'],
+  },
+  referencial: {
+    name: 'Referencial', aka: 'Cognoscitiva / Denotativa', factor: 'Contexto',
+    color: '#1d4ed8', bg: 'rgba(29,78,216,.08)', bd: 'rgba(29,78,216,.35)',
+    cls: 'c-ref',
+    def: 'Orientada hacia el <strong>contexto</strong>. Vehicula información sobre el mundo externo (el referente). Es la función dominante en la comunicación informativa.',
+    quote: '"La orientación hacia el CONTEXTO —en una palabra, la llamada función REFERENCIAL, «cognoscitiva», «denotativa»— es la función dominante de numerosos mensajes." (p. 353)',
+    ex: ['La reunión es el martes a las 10.  —  El agua hierve a 100°C.', 'Noticias, datos, enunciados científicos.'],
+  },
+  poetica: {
+    name: 'Poética', aka: 'Estética', factor: 'Mensaje',
+    color: '#6d28d9', bg: 'rgba(109,40,217,.08)', bd: 'rgba(109,40,217,.35)',
+    cls: 'c-poe',
+    def: 'Orientada hacia el <strong>mensaje mismo</strong>. "La función poética proyecta el principio de equivalencia del eje de selección al eje de combinación." La forma del enunciado cobra protagonismo.',
+    quote: '"La función poética proyecta el principio de equivalencia del eje de selección al eje de combinación." (p. 360)',
+    ex: ['Veni, vidi, vici.  —  Ana y María, nunca María y Ana.', 'Aliteraciones, paralelismos, rimas, ritmo.'],
+  },
+  fatica: {
+    name: 'Fática', aka: 'De contacto', factor: 'Contacto',
+    color: '#15803d', bg: 'rgba(21,128,61,.08)', bd: 'rgba(21,128,61,.35)',
+    cls: 'c-fat',
+    def: 'Orientada hacia el <strong>contacto</strong>. Sirve para establecer, prolongar o interrumpir la comunicación, verificar si el canal funciona, atraer y retener la atención del interlocutor.',
+    quote: '"Hay mensajes que sirven sobre todo para establecer, prolongar o interrumpir la comunicación, para verificar si el canal funciona." (p. 356)',
+    ex: ['¿Hola? ¿Me escuchás?  —  Bueno… sí… claro…', '«Halo, haló» — saludos cotidianos sin contenido informativo.'],
+  },
+  metalinguistica: {
+    name: 'Metalingüística', aka: 'Metalingual', factor: 'Código',
+    color: '#0e7490', bg: 'rgba(14,116,144,.08)', bd: 'rgba(14,116,144,.35)',
+    cls: 'c-met',
+    def: 'Orientada hacia el <strong>código</strong>. Cuando destinador y/o destinatario quieren confirmar que están usando el mismo código. El lenguaje habla sobre el lenguaje.',
+    quote: '"Cuando el destinador y/o el destinatario quieren confirmar que están usando el mismo código, el discurso se centra en el CÓDIGO: realiza una función METALINGÜÍSTICA." (p. 357)',
+    ex: ['¿Qué significa «deixis»?  —  Un «repelente» es uno que repele.', 'Definiciones, preguntas sobre el sentido de palabras.'],
+  },
+  conativa: {
+    name: 'Conativa', aka: 'Apelativa', factor: 'Destinatario',
+    color: '#b45309', bg: 'rgba(180,83,9,.08)', bd: 'rgba(180,83,9,.35)',
+    cls: 'c-con',
+    def: 'Orientada hacia el <strong>destinatario</strong>. Su expresión gramatical más pura son el vocativo y el imperativo. Busca producir un efecto o una acción en el receptor.',
+    quote: '"La función CONATIVA halla su más pura expresión gramatical en el vocativo y el imperativo." (p. 355)',
+    ex: ['Cerrá la puerta.  —  ¡Escuchame!  —  Por favor, vengan acá.', 'Mandatos, ruegos, vocativos.'],
+  },
+};
+
+/* Preguntas del quiz */
+const ALL_QS = [
+  // ── CLARAS (easy) ──────────────────────────────────────────────────────
+  { text: "¡Ay, qué dolor de cabeza tengo!",
+    ctx: "Alguien expresando malestar",
+    ans: "emotiva", diff: "easy",
+    expl: "Expresa directamente la actitud emocional del hablante (el dolor). No informa sobre nada exterior ni exhorta al receptor." },
+
+  { text: "La capital de Argentina es Buenos Aires.",
+    ctx: "Dato factual",
+    ans: "referencial", diff: "easy",
+    expl: "Transmite información verificable sobre el mundo (el referente). Función referencial clásica." },
+
+  { text: "¿Hola? ¿Seguís ahí? ¿Me escuchás?",
+    ctx: "Durante una llamada telefónica",
+    ans: "fatica", diff: "easy",
+    expl: "El único propósito es verificar que el canal funciona. Jakobson cita exactamente estas expresiones como ejemplo de función fática (p. 356)." },
+
+  { text: "Cerrá la puerta, por favor.",
+    ctx: "Pedido en casa",
+    ans: "conativa", diff: "easy",
+    expl: "El imperativo orientado al destinatario busca producir una acción. Es la expresión gramatical más pura de la función conativa." },
+
+  { text: "¿Qué significa la palabra «deixis»?",
+    ctx: "Clase de lingüística",
+    ans: "metalinguistica", diff: "easy",
+    expl: "El hablante pregunta por el significado de una palabra: habla sobre el código mismo. Función metalingüística." },
+
+  { text: "¡Qué asco me da eso!",
+    ctx: "Reacción espontánea",
+    ans: "emotiva", diff: "easy",
+    expl: "Expresa la actitud interna del hablante (repulsa). La función emotiva apunta hacia el destinador, no hacia el mundo ni el receptor." },
+
+  { text: "Mañana hay paro de colectivos en toda la ciudad.",
+    ctx: "Noticia",
+    ans: "referencial", diff: "easy",
+    expl: "Informa sobre un hecho del mundo exterior. Sin carga emotiva ni apelación directa al receptor." },
+
+  { text: "Bueno… sí… claro… ajá…",
+    ctx: "Escuchando a alguien hablar por teléfono",
+    ans: "fatica", diff: "easy",
+    expl: "No informan ni exhortan: señalan que uno sigue presente y el canal está abierto. Jakobson los llama expresiones fáticas (p. 357)." },
+
+  { text: "¡Escuchame bien, te lo digo una sola vez!",
+    ctx: "Advertencia directa",
+    ans: "conativa", diff: "easy",
+    expl: "El imperativo y el destinatario explícito orientan el mensaje hacia producir un efecto en el receptor. Función conativa." },
+
+  { text: "Un «sustantivo» es una categoría gramatical que nombra personas, objetos o ideas.",
+    ctx: "Definición en clase",
+    ans: "metalinguistica", diff: "easy",
+    expl: "Define un término del código lingüístico. El lenguaje habla sobre sí mismo: función metalingüística." },
+
+  { text: "¡No puedo creer lo que me hicieron, qué bronca!",
+    ctx: "Desahogo personal",
+    ans: "emotiva", diff: "easy",
+    expl: "Expresa el estado emocional del destinador (indignación). No busca provocar acción ni informar sobre el mundo." },
+
+  { text: "Por favor, no uses el celular durante la clase.",
+    ctx: "Profesora a un alumno",
+    ans: "conativa", diff: "easy",
+    expl: "El imperativo negativo apunta directamente al destinatario y busca modificar su conducta. Función conativa." },
+
+  // ── DIFÍCILES (hard) ────────────────────────────────────────────────────
+  { text: "Veni, vidi, vici.",
+    ctx: "Julio César, según Plutarco",
+    ans: "poetica", diff: "hard",
+    expl: "La aliteración (v-v-v), el paralelismo de los tres verbos y el ritmo ternario orientan el mensaje hacia su propia forma. Jakobson la analiza al explicar la función poética (p. 359)." },
+
+  { text: "En el principio era el Verbo, y el Verbo era con Dios.",
+    ctx: "Evangelio de Juan 1:1",
+    ans: "poetica", diff: "hard",
+    expl: "El paralelismo quiástico («era el Verbo… el Verbo era») es un rasgo poético clásico: la forma del mensaje importa tanto como el contenido." },
+
+  { text: "Ana y María y nunca María y Ana.",
+    ctx: "Ejemplo citado por Jakobson (p. 361)",
+    ans: "poetica", diff: "hard",
+    expl: "Jakobson analiza expresamente esta expresión: la equivalencia y simetría entre los dos nombres son rasgos de función poética. La forma del mensaje es la que importa." },
+
+  { text: "¿Qué querés decir exactamente con «ambiguo»?",
+    ctx: "Conversación académica",
+    ans: "metalinguistica", diff: "hard",
+    expl: "Se pide al interlocutor que aclare el sentido de una palabra del código. Destinador y destinatario verifican que comparten el mismo código." },
+
+  { text: "Un «repelente» es, lo que significa, uno que repele.",
+    ctx: "Jakobson lo cita textualmente (p. 357)",
+    ans: "metalinguistica", diff: "hard",
+    expl: "Jakobson usa este ejemplo exacto para ilustrar la función metalingüística: la palabra «repelente» es definida a partir del propio código lingüístico." },
+
+  { text: "¡Buenas! ¿Cómo andás? Bien, bien…",
+    ctx: "Saludo cotidiano en la calle",
+    ans: "fatica", diff: "hard",
+    expl: "El saludo cotidiano no transmite información nueva: establece y mantiene el contacto social. Malinowski llamó a este tipo de intercambio «comunión fática» (p. 356)." },
+
+  { text: "Amor, amor, amor — eterna llama que consume sin arder.",
+    ctx: "Poema",
+    ans: "poetica", diff: "hard",
+    expl: "La anáfora (amor, amor, amor), la paradoja y el ritmo orientan el mensaje hacia su propia forma. La función poética es dominante." },
+
+  { text: "¿Bebés? ¿Bebés? ¿Bebés?",
+    ctx: "Jakobson cita el ejemplo de O'Neill (p. 355)",
+    ans: "fatica", diff: "hard",
+    expl: "Jakobson cita este ejemplo de O'Neill: la pregunta reiterada no busca información sino mantener el hilo de la comunicación. Función fática." },
+];
+
+/* ━━━━━━━━━━━━━━━━━ ESQUEMA ━━━━━━━━━━━━━━━━━ */
+
+let activeDetail = null;
+
+function showDetail(id) {
+  const panel = document.getElementById('detail-panel');
+  if (activeDetail === id && panel.classList.contains('visible')) {
+    panel.classList.remove('visible');
+    activeDetail = null;
+    return;
+  }
+  activeDetail = id;
+  const f = FN[id];
+  panel.style.borderColor = f.bd;
+  panel.innerHTML = `
+    <h3 style="color:${f.color};margin-bottom:.4rem">${f.name}
+      <span style="color:var(--muted);font-size:.8rem;font-weight:normal"> / ${f.aka}</span>
+    </h3>
+    <span class="d-badge" style="background:${f.bg};color:${f.color};border:1px solid ${f.bd}">Factor: ${f.factor}</span>
+    <p class="d-def">${f.def}</p>
+    <blockquote class="d-quote" style="border-left-color:${f.bd}">${f.quote}</blockquote>
+    <p class="d-ex-label">Ejemplos</p>
+    ${f.ex.map(e => `<p class="d-ex">${e}</p>`).join('')}
+  `;
+  panel.classList.add('visible');
+}
+
+/* ━━━━━━━━━━━━━━━━━ TARJETAS ━━━━━━━━━━━━━━━━━ */
+
+function buildCards() {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+  Object.entries(FN).forEach(([id, f]) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.borderColor = f.bd;
+    let side = 'front';
+
+    const front = () => `
+      <div>
+        <div class="card-label" style="color:${f.color}">Función</div>
+        <div class="card-name" style="color:${f.color}">${f.name}</div>
+        <div class="card-sub">Factor: ${f.factor} &nbsp;·&nbsp; ${f.aka}</div>
+      </div>
+      <div class="card-hint">clic para ver definición →</div>
+    `;
+
+    const back = () => `
+      <div>
+        <div class="card-label" style="color:${f.color}">${f.name} — ${f.factor}</div>
+        <p style="font-size:.84rem;color:var(--muted);margin-bottom:.7rem">${f.def.replace(/<\/?strong>/g,'')}</p>
+        <p style="font-style:italic;font-size:.8rem;color:var(--muted);border-left:2px solid ${f.bd};padding-left:.7rem">${f.ex[0]}</p>
+      </div>
+      <div class="card-hint">← volver</div>
+    `;
+
+    card.innerHTML = front();
+    card.onclick = () => {
+      side = side === 'front' ? 'back' : 'front';
+      card.innerHTML = side === 'front' ? front() : back();
+    };
+    grid.appendChild(card);
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━ QUIZ ━━━━━━━━━━━━━━━━━ */
+
+let questions = [], cur = 0, score = 0, answered = false, quizMode = 'all';
+
+function setMode(m) {
+  quizMode = m;
+  ['all','easy','hard'].forEach(x => {
+    document.getElementById('btn-'+x).classList.toggle('active', x === m);
+  });
+  startQuiz();
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
+
+function startQuiz() {
+  let pool = ALL_QS;
+  if (quizMode === 'easy') pool = ALL_QS.filter(q => q.diff === 'easy');
+  if (quizMode === 'hard') pool = ALL_QS.filter(q => q.diff === 'hard');
+  questions = shuffle(pool);
+  cur = 0; score = 0; answered = false;
+  document.getElementById('quiz-game').classList.remove('hidden');
+  document.getElementById('quiz-result').classList.add('hidden');
+  renderQ();
+}
+
+function renderQ() {
+  answered = false;
+  const q = questions[cur], n = questions.length;
+
+  document.getElementById('prog').style.width = `${(cur/n)*100}%`;
+  document.getElementById('score-txt').textContent = `${score} / ${cur} correctas`;
+  document.getElementById('qcount').textContent = `Pregunta ${cur+1} de ${n}`;
+  document.getElementById('qnum').textContent = `Pregunta ${cur+1}`;
+  document.getElementById('qtext').textContent = `"${q.text}"`;
+  document.getElementById('qctx').textContent = q.ctx;
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  document.getElementById('next-btn').classList.add('hidden');
+
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  shuffle(Object.keys(FN)).forEach(id => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = FN[id].name;
+    btn.dataset.id = id;
+    btn.onclick = () => pick(id);
+    opts.appendChild(btn);
+  });
+}
+
+function pick(chosen) {
+  if (answered) return;
+  answered = true;
+  const q = questions[cur];
+  const ok = chosen === q.ans;
+  if (ok) score++;
+
+  document.querySelectorAll('.opt-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.id === q.ans)   b.classList.add(ok ? 'correct' : 'reveal');
+    else if (b.dataset.id === chosen && !ok) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback visible ${ok ? 'ok' : 'fail'}`;
+  document.getElementById('fb-icon').textContent  = ok ? '✓' : '✗';
+  document.getElementById('fb-title').textContent = ok
+    ? `Correcto — función ${FN[q.ans].name}`
+    : `Era la función ${FN[q.ans].name}`;
+  document.getElementById('fb-expl').textContent = q.expl;
+
+  const nb = document.getElementById('next-btn');
+  nb.textContent = (cur + 1 < questions.length) ? 'Siguiente →' : 'Ver resultado →';
+  nb.classList.remove('hidden');
+  document.getElementById('score-txt').textContent = `${score} / ${cur+1} correctas`;
+}
+
+function nextQ() {
+  cur++;
+  if (cur >= questions.length) showResult();
+  else renderQ();
+}
+
+function showResult() {
+  document.getElementById('quiz-game').classList.add('hidden');
+  document.getElementById('quiz-result').classList.remove('hidden');
+  const n = questions.length;
+  const pct = Math.round((score/n)*100);
+  document.getElementById('r-score').textContent = `${score}/${n}`;
+  document.getElementById('r-of').textContent = `${pct}% correctas`;
+
+  let msg;
+  if (pct === 100) msg = '"La función dominante de este ejercicio fue tu atención." ✓';
+  else if (pct >= 80) msg = 'Muy bien. Dominás las funciones del modelo.';
+  else if (pct >= 60) msg = 'Buen camino. Revisá las Tarjetas para las que fallaste.';
+  else if (pct >= 40) msg = 'Vale la pena repasar el Esquema antes de reintentar.';
+  else               msg = 'Empezá por el Esquema y las Tarjetas — después volvé al quiz.';
+
+  document.getElementById('r-msg').textContent = msg;
+}
+
+/* ━━━━━━━━━━━━━━━━━ NAVEGACIÓN ━━━━━━━━━━━━━━━━━ */
+
+function showSection(name) {
+  ['esquema','tarjetas','quiz'].forEach((s,i) => {
+    document.getElementById(`section-${s}`).classList.toggle('hidden', s !== name);
+    document.querySelectorAll('nav button')[i].classList.toggle('active', s === name);
+  });
+  if (name === 'tarjetas') buildCards();
+  if (name === 'quiz') startQuiz();
+}
+
+/* init */
+showSection('esquema');
+</script>
+</body>
+</html>
