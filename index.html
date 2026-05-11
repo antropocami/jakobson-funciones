@@ -131,12 +131,13 @@ main {
 
 /* detail panel */
 #detail-panel {
+  border-radius: 14px;
+  animation: fadeIn .2s;
+}
+#detail-panel.has-content {
   background: var(--surf);
   border: 1px solid var(--surf2);
-  border-radius: 14px;
   padding: 1.4rem 1.6rem;
-  min-height: 280px;
-  animation: fadeIn .2s;
 }
 
 .d-badge {
@@ -420,7 +421,10 @@ main {
       <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
       <div class="quiz-meta">
         <span id="score-txt">0 / 0 correctas</span>
-        <span id="qcount">Pregunta 1 de 20</span>
+        <span style="display:flex;gap:1rem;align-items:center">
+          <span id="qcount">Pregunta 1 de 20</span>
+          <button onclick="resetQuiz()" style="font-size:.7rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:Georgia,serif;text-decoration:underline;padding:0">empezar de cero</button>
+        </span>
       </div>
       <div class="q-card">
         <div class="q-num" id="qnum"></div>
@@ -610,18 +614,20 @@ const ALL_QS = [
 
 let activeDetail = null;
 
-const PLACEHOLDER = `<p style="color:var(--muted);font-size:.88rem;padding:2.5rem 0;text-align:center;line-height:2">← Seleccioná una función del esquema</p>`;
+const PLACEHOLDER = `<p style="color:var(--muted);font-size:.82rem;padding:.5rem 0;opacity:.7">← Seleccioná una función</p>`;
 
 function showDetail(id) {
   const panel = document.getElementById('detail-panel');
   if (activeDetail === id) {
     activeDetail = null;
-    panel.style.borderColor = 'var(--surf2)';
+    panel.classList.remove('has-content');
+    panel.style.borderColor = '';
     panel.innerHTML = PLACEHOLDER;
     return;
   }
   activeDetail = id;
   const f = FN[id];
+  panel.classList.add('has-content');
   panel.style.borderColor = f.bd;
   panel.innerHTML = `
     <h3 style="color:${f.color};margin-bottom:.4rem">${f.name}
@@ -635,7 +641,7 @@ function showDetail(id) {
   `;
 }
 
-/* init detail panel with placeholder */
+/* init detail panel placeholder (no box) */
 document.getElementById('detail-panel').innerHTML = PLACEHOLDER;
 
 /* ━━━━━━━━━━━━━━━━━ TARJETAS ━━━━━━━━━━━━━━━━━ */
@@ -678,19 +684,42 @@ function buildCards() {
 
 /* ━━━━━━━━━━━━━━━━━ QUIZ ━━━━━━━━━━━━━━━━━ */
 
+const SAVE_KEY = 'jakobson_quiz_v1';
 let questions = [], cur = 0, score = 0, answered = false, quizMode = 'all';
+
+function saveState() {
+  const indices = questions.map(q => ALL_QS.indexOf(q));
+  localStorage.setItem(SAVE_KEY, JSON.stringify({ mode: quizMode, indices, cur, score }));
+}
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch { return null; }
+}
+function clearState() { localStorage.removeItem(SAVE_KEY); }
 
 function setMode(m) {
   quizMode = m;
-  ['all','easy','hard'].forEach(x => {
-    document.getElementById('btn-'+x).classList.toggle('active', x === m);
-  });
+  ['all','easy','hard'].forEach(x =>
+    document.getElementById('btn-'+x).classList.toggle('active', x === m));
+  clearState();
   startQuiz();
 }
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
 
 function startQuiz() {
+  const saved = loadState();
+  if (saved && saved.mode === quizMode && saved.cur < (saved.indices || []).length) {
+    questions = saved.indices.map(i => ALL_QS[i]);
+    cur = saved.cur; score = saved.score; answered = false;
+    quizMode = saved.mode;
+    ['all','easy','hard'].forEach(x =>
+      document.getElementById('btn-'+x).classList.toggle('active', x === saved.mode));
+    document.getElementById('quiz-game').classList.remove('hidden');
+    document.getElementById('quiz-result').classList.add('hidden');
+    renderQ(true);
+    return;
+  }
+  clearState();
   let pool = ALL_QS;
   if (quizMode === 'easy') pool = ALL_QS.filter(q => q.diff === 'easy');
   if (quizMode === 'hard') pool = ALL_QS.filter(q => q.diff === 'hard');
@@ -698,17 +727,21 @@ function startQuiz() {
   cur = 0; score = 0; answered = false;
   document.getElementById('quiz-game').classList.remove('hidden');
   document.getElementById('quiz-result').classList.add('hidden');
-  renderQ();
+  renderQ(false);
 }
 
-function renderQ() {
+function resetQuiz() { clearState(); startQuiz(); }
+
+function renderQ(restored) {
   answered = false;
   const q = questions[cur], n = questions.length;
 
   document.getElementById('prog').style.width = `${(cur/n)*100}%`;
   document.getElementById('score-txt').textContent = `${score} / ${cur} correctas`;
   document.getElementById('qcount').textContent = `Pregunta ${cur+1} de ${n}`;
-  document.getElementById('qnum').textContent = `Pregunta ${cur+1}`;
+  document.getElementById('qnum').textContent = restored
+    ? `Pregunta ${cur+1} — retomando donde dejaste`
+    : `Pregunta ${cur+1}`;
   document.getElementById('qtext').textContent = `"${q.text}"`;
   document.getElementById('qctx').textContent = q.ctx;
 
@@ -753,12 +786,13 @@ function pick(chosen) {
   nb.textContent = (cur + 1 < questions.length) ? 'Siguiente →' : 'Ver resultado →';
   nb.classList.remove('hidden');
   document.getElementById('score-txt').textContent = `${score} / ${cur+1} correctas`;
+  document.getElementById('qnum').textContent = `Pregunta ${cur+1}`;
 }
 
 function nextQ() {
   cur++;
-  if (cur >= questions.length) showResult();
-  else renderQ();
+  if (cur >= questions.length) { clearState(); showResult(); }
+  else { saveState(); renderQ(false); }
 }
 
 function showResult() {
