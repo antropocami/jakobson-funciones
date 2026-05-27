@@ -136,6 +136,13 @@ main{max-width:1100px;width:100%;margin:0 auto;padding:2.5rem 2rem;flex:1;}
 .ej-footer-link{margin-top:2.5rem;text-align:right;font-size:.72rem;color:var(--muted);}
 .ej-footer-link button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:600;text-decoration:underline;padding:0;}
 .ej-footer-link button:hover{color:var(--text);}
+.ej-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;line-height:1;padding:.2rem .3rem;border-radius:6px;transition:background .15s,color .15s;flex-shrink:0;}
+.ej-del-btn:hover{background:#fee2e2;color:#991b1b;}
+
+/* nav login btn */
+.nav-login-btn{padding:.4rem 1.1rem;border:1.5px solid var(--bord);background:transparent;color:var(--muted);border-radius:20px;cursor:pointer;font-size:.82rem;font-family:'Nunito',sans-serif;font-weight:600;transition:all .18s;}
+.nav-login-btn:hover{background:var(--surf2);color:var(--text);}
+.nav-login-btn.logged-in{background:#f0fdf4;color:#065f46;border-color:#6ee7b7;}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn .2s;padding:1rem;}
@@ -198,12 +205,8 @@ footer{border-top:1px solid var(--bord);background:var(--surf);padding:1.2rem 2r
     <button class="active" onclick="showSection('esquema')">Esquema</button>
     <button onclick="showSection('quiz')">Quiz</button>
     <button onclick="showSection('ejemplario')">Ejemplario</button>
+    <button class="nav-login-btn" id="nav-login-btn" onclick="onNavLoginClick()">Docente</button>
   </nav>
-  <div id="prof-bar" class="prof-bar hidden">
-    <span>Modo docente:</span>
-    <strong id="prof-email-display" style="font-size:.72rem"></strong>
-    <button onclick="logoutProf()">Salir</button>
-  </div>
 </header>
 
 <main>
@@ -333,9 +336,6 @@ footer{border-top:1px solid var(--bord);background:var(--surf);padding:1.2rem 2r
       <button class="ej-otro-btn" onclick="showEjForm()">Agregar otro</button>
     </div>
   </div>
-  <div class="ej-footer-link">
-    <button onclick="openAdminModal()">Acceso docente →</button>
-  </div>
 </div>
 
 </main>
@@ -458,19 +458,23 @@ let lastPropuesta = null;
 let activeDetail = null;
 let questions = [], cur = 0, score = 0, answered = false, quizMode = 'all';
 let communityQs = [];
+let _lastApprovedItems = [];
 
 /* ── AUTH ── */
 onAuthStateChanged(auth, user => {
   currentUser = user;
-  const bar = document.getElementById('prof-bar');
+  const btn = document.getElementById('nav-login-btn');
   if (user) {
-    bar.classList.remove('hidden');
-    document.getElementById('prof-email-display').textContent = user.email;
+    btn.textContent = user.email.split('@')[0];
+    btn.classList.add('logged-in');
     if (!document.getElementById('admin-modal').classList.contains('hidden')) showAdminPanel();
     startAdminListener();
+    renderEjGrid(_lastApprovedItems);
   } else {
-    bar.classList.add('hidden');
+    btn.textContent = 'Docente';
+    btn.classList.remove('logged-in');
     stopAdminListener();
+    renderEjGrid(_lastApprovedItems);
   }
 });
 
@@ -619,6 +623,7 @@ function startApprovedListener() {
   unsubApproved = onSnapshot(q, snap => {
     const items = snap.docs.map(d => ({id:d.id,...d.data()}))
       .sort((a,b) => (a.submittedAt?.seconds||0)-(b.submittedAt?.seconds||0));
+    _lastApprovedItems = items;
     renderEjGrid(items);
     communityQs = items
       .filter(e => e.fn && FN[e.fn])
@@ -640,13 +645,26 @@ function renderEjGrid(items) {
   }
   grid.innerHTML = items.map(e => {
     const f = FN[e.fn]; if (!f) return '';
+    const delBtn = currentUser
+      ? `<button class="ej-del-btn" onclick="deleteEjemplo('${e.id}')" title="Eliminar ejemplo">✕</button>`
+      : '';
     return `<div class="ej-card">
-      <span class="ej-badge" style="background:${f.bg};color:${f.color};border:1.5px solid ${f.bd}">${f.name}</span>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+        <span class="ej-badge" style="background:${f.bg};color:${f.color};border:1.5px solid ${f.bd}">${f.name}</span>
+        ${delBtn}
+      </div>
       <p class="ej-text">"${e.text}"</p>
       ${e.ctx ? `<p class="ej-ctx">${e.ctx}</p>` : ''}
       ${e.author ? `<p class="ej-author">${e.author}</p>` : ''}
     </div>`;
   }).join('');
+}
+
+async function deleteEjemplo(id) {
+  if (!currentUser) return;
+  if (!confirm('¿Eliminar este ejemplo del ejemplario?')) return;
+  try { await deleteDoc(doc(db,'propuestas',id)); }
+  catch(err) { alert('Error al eliminar.'); console.error(err); }
 }
 
 /* ── EJEMPLARIO — ENVÍO ── */
@@ -776,6 +794,11 @@ async function adminAction(id, action) {
   } catch(err) { alert('Error al actualizar. Verificá tu conexión.'); console.error(err); }
 }
 
+function onNavLoginClick() {
+  if (currentUser) openAdminModal();
+  else openAdminModal();
+}
+
 /* ── MODAL ── */
 function openAdminModal() {
   document.getElementById('admin-modal').classList.remove('hidden');
@@ -805,7 +828,8 @@ startApprovedListener();
 Object.assign(window, {
   showSection, showDetail, setMode, resetQuiz, nextQ, startQuiz,
   submitEjemplo, copyPropuesta, showEjForm,
-  openAdminModal, closeAdminModal, loginProf, logoutProf, adminAction
+  openAdminModal, closeAdminModal, loginProf, logoutProf, adminAction,
+  deleteEjemplo, onNavLoginClick
 });
 </script>
 </body>
