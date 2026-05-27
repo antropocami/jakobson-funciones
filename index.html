@@ -457,6 +457,7 @@ let unsubAdmin = null;
 let lastPropuesta = null;
 let activeDetail = null;
 let questions = [], cur = 0, score = 0, answered = false, quizMode = 'all';
+let communityQs = [];
 
 /* ── AUTH ── */
 onAuthStateChanged(auth, user => {
@@ -516,19 +517,22 @@ function setMode(m) {
   clearState(); startQuiz();
 }
 function startQuiz() {
+  const BASE = [...ALL_QS, ...communityQs];
   const saved = loadState();
   if (saved && saved.mode === quizMode && saved.cur < (saved.indices||[]).length) {
-    questions = saved.indices.map(i => ALL_QS[i]);
-    cur = saved.cur; score = saved.score; answered = false; quizMode = saved.mode;
-    ['all','easy','hard'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===saved.mode));
-    document.getElementById('quiz-game').classList.remove('hidden');
-    document.getElementById('quiz-result').classList.add('hidden');
-    renderQ(true); return;
+    questions = saved.indices.map(i => BASE[i]).filter(Boolean);
+    if (questions.length) {
+      cur = saved.cur; score = saved.score; answered = false; quizMode = saved.mode;
+      ['all','easy','hard'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===saved.mode));
+      document.getElementById('quiz-game').classList.remove('hidden');
+      document.getElementById('quiz-result').classList.add('hidden');
+      renderQ(true); return;
+    }
   }
   clearState();
-  let pool = ALL_QS;
-  if (quizMode==='easy') pool = ALL_QS.filter(q=>q.diff==='easy');
-  if (quizMode==='hard') pool = ALL_QS.filter(q=>q.diff==='hard');
+  let pool = BASE;
+  if (quizMode==='easy') pool = BASE.filter(q=>q.diff==='easy');
+  if (quizMode==='hard') pool = BASE.filter(q=>q.diff==='hard');
   questions = shuffle(pool); cur=0; score=0; answered=false;
   document.getElementById('quiz-game').classList.remove('hidden');
   document.getElementById('quiz-result').classList.add('hidden');
@@ -593,6 +597,22 @@ function showResult() {
 }
 
 /* ── EJEMPLARIO — LISTENER PÚBLICO ── */
+const AUTO_EXPL = {
+  emotiva:         'Ejemplo propuesto por la clase y aprobado por la cátedra. La función emotiva es dominante: el mensaje expresa la actitud o estado interno del destinador.',
+  referencial:     'Ejemplo propuesto por la clase y aprobado por la cátedra. La función referencial es dominante: el mensaje transmite información sobre el mundo exterior (el referente).',
+  poetica:         'Ejemplo propuesto por la clase y aprobado por la cátedra. La función poética es dominante: la atención recae sobre la forma del mensaje en sí mismo.',
+  fatica:          'Ejemplo propuesto por la clase y aprobado por la cátedra. La función fática es dominante: el mensaje sirve para establecer o mantener el contacto entre los interlocutores.',
+  metalinguistica: 'Ejemplo propuesto por la clase y aprobado por la cátedra. La función metalingüística es dominante: el lenguaje se usa para hablar sobre el propio código lingüístico.',
+  conativa:        'Ejemplo propuesto por la clase y aprobado por la cátedra. La función conativa es dominante: el mensaje busca producir un efecto o acción en el destinatario, mediante el imperativo o el vocativo.',
+};
+
+function updateModeBtns() {
+  const all = [...ALL_QS, ...communityQs];
+  document.getElementById('btn-all').textContent  = `Todas (${all.length})`;
+  document.getElementById('btn-easy').textContent = `Más claras (${all.filter(q=>q.diff==='easy').length})`;
+  document.getElementById('btn-hard').textContent = `Más difíciles (${all.filter(q=>q.diff==='hard').length})`;
+}
+
 function startApprovedListener() {
   if (unsubApproved) return;
   const q = query(collection(db, 'propuestas'), where('status','==','approved'));
@@ -600,6 +620,10 @@ function startApprovedListener() {
     const items = snap.docs.map(d => ({id:d.id,...d.data()}))
       .sort((a,b) => (a.submittedAt?.seconds||0)-(b.submittedAt?.seconds||0));
     renderEjGrid(items);
+    communityQs = items
+      .filter(e => e.fn && FN[e.fn])
+      .map(e => ({ text:e.text, ctx:e.ctx||'Ejemplo de la clase', ans:e.fn, diff:'hard', expl:AUTO_EXPL[e.fn]||'' }));
+    updateModeBtns();
   }, err => {
     document.getElementById('ej-grid').innerHTML = '<p class="ej-empty">No se pudo cargar el ejemplario. Verificá tu conexión.</p>';
     console.error(err);
@@ -775,6 +799,7 @@ function showSection(name) {
   if (name==='ejemplario') startApprovedListener();
 }
 showSection('esquema');
+startApprovedListener();
 
 /* ── EXPONER A window (para onclick en HTML) ── */
 Object.assign(window, {
